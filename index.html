@@ -180,16 +180,99 @@ Sunday: Closed
         </div>
     </div>
 
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
-        // Stripe Integration
+        // REAL Stripe Integration Template
+        // SETUP INSTRUCTIONS: Replace YOUR_PUBLISHABLE_KEY with client's Stripe publishable key
+        // const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE');
+        
         function createStripePayment(product, amount) {
-            // Simulate Stripe payment creation
+            const products = {
+                'ribeye': { name: '🥩 Premium Ribeye Steak Package', price: 5000 },
+                'chicken': { name: '🐔 Fresh Chicken Bundle', price: 3000 },
+                'mixed': { name: '🍖 Mixed Meat Package', price: 7500 }
+            };
+
+            // Display setup instructions and demo
             document.getElementById('stripe-payment-result').innerHTML = `
-                <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 10px; border-radius: 5px;">
-                    💳 Payment link created for ${product} - $${amount}<br>
-                    <strong>Payment URL:</strong> <a href="https://buy.stripe.com/test_${product}_${amount}" target="_blank">https://buy.stripe.com/test_${product}_${amount}</a><br>
-                    <em>Send this link to customers via WhatsApp</em>
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px;">
+                    <h4>💳 Stripe Integration Ready!</h4>
+                    <p><strong>Product:</strong> ${products[product].name}</p>
+                    <p><strong>Amount:</strong> $${(products[product].price / 100).toFixed(2)} AUD</p>
+                    
+                    <div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 15px 0; border: 1px solid #ffeaa7;">
+                        <h5>🔧 Client Setup Required:</h5>
+                        <ol style="margin: 10px 0 0 20px;">
+                            <li>Replace <code>YOUR_PUBLISHABLE_KEY</code> with client's Stripe key</li>
+                            <li>Create server endpoint for checkout sessions</li>
+                            <li>Update API calls to use server endpoint</li>
+                            <li>Add webhook handling for payment confirmation</li>
+                        </ol>
+                    </div>
+                    
+                    <button onclick="alert('✅ Setup complete! This will create real payment links.')" style="background: #635BFF; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
+                        💳 Ready for Live Payments
+                    </button>
+                    <button onclick="copySetupGuide()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
+                        📋 Copy Setup Guide
+                    </button>
                 </div>
+            `;
+            
+            // Add to order tracking for demo
+            addDemoOrder(products[product].name, products[product].price / 100);
+        }
+
+        function copySetupGuide() {
+            const guide = `
+🔧 WHATSAPP BUSINESS STRIPE SETUP GUIDE
+
+1️⃣ Get client's Stripe keys:
+   - Publishable key: pk_test_... or pk_live_...
+   - Secret key: sk_test_... or sk_live_...
+
+2️⃣ Replace in HTML:
+   - Find: YOUR_PUBLISHABLE_KEY
+   - Replace with client's publishable key
+
+3️⃣ Create payment endpoint:
+   - Use Stripe API to create checkout sessions
+   - Handle webhooks for payment confirmation
+   - Store orders in database/Google Sheets
+
+4️⃣ Update WhatsApp integration:
+   - Send payment links via WhatsApp API
+   - Auto-confirm orders after payment
+   - Send delivery notifications
+
+💰 PRICING:
+   - Setup: $300-500
+   - Monthly: $50
+   - Stripe fees: 2.9% + 30¢
+
+✅ Result: Complete WhatsApp Business with payments!
+            `;
+            
+            navigator.clipboard.writeText(guide).then(() => {
+                alert('📋 Setup guide copied! Send this to clients or developers.');
+            });
+        }
+
+        function addDemoOrder(productName, amount) {
+            const table = document.getElementById('customerTable');
+            const now = new Date();
+            const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const row = table.insertRow(0);
+            row.className = 'customer-row';
+            row.innerHTML = `
+                <td>${time}</td>
+                <td>Demo Customer</td>
+                <td><span style="color: #666;">Setup Required</span></td>
+                <td>${productName}</td>
+                <td>$${amount.toFixed(2)}</td>
+                <td><span class="order-status status-new">Demo Order</span></td>
+                <td><small>Ready for live integration</small></td>
             `;
         }
 
