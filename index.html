@@ -140,14 +140,15 @@
             <!-- Service Login Panels -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
                 
-                <!-- WhatsApp Business Login -->
+                <!-- WhatsApp Login -->
                 <div id="whatsapp-login-panel" style="background: #e8f5e8; padding: 15px; border-radius: 10px; border-left: 5px solid #25D366;">
-                    <h4>📱 WhatsApp Business</h4>
+                    <h4>📱 WhatsApp</h4>
                     <div id="whatsapp-status" style="margin: 10px 0; color: #d32f2f;">❌ Not Connected</div>
-                    <button id="whatsapp-login-btn" onclick="loginWithWhatsApp()" style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 5px; width: 100%;">🔗 Login with WhatsApp Business</button>
+                    <button id="whatsapp-login-btn" onclick="openWhatsAppWeb()" style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 5px; width: 100%;">📱 Open WhatsApp Web</button>
+                    <button id="whatsapp-connected-btn" onclick="markWhatsAppConnected()" style="background: #128C7E; color: white; border: none; padding: 10px 15px; border-radius: 5px; width: 100%; display: none; margin-top: 5px;">✅ I'm Connected</button>
                     <button id="whatsapp-logout-btn" onclick="logoutWhatsApp()" style="background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; width: 100%; display: none; margin-top: 5px;">🚪 Logout</button>
                     <div id="whatsapp-details" style="margin-top: 10px; font-size: 12px; color: #666; display: none;">
-                        Connected: <span id="whatsapp-account">-</span>
+                        Status: Ready to send messages
                     </div>
                 </div>
 
@@ -346,36 +347,26 @@ Sunday: Closed
             }
         };
 
-        // WhatsApp Business OAuth Login
-        function loginWithWhatsApp() {
-            if (OAUTH_CONFIG.whatsapp.clientId === 'YOUR_FACEBOOK_APP_ID') {
-                alert('⚠️ Setup Required: Please configure your Facebook App ID in the OAuth settings');
-                return;
-            }
+        // Simple WhatsApp Web Login (like you want)
+        function openWhatsAppWeb() {
+            // Open WhatsApp Web in new tab
+            window.open('https://web.whatsapp.com', '_blank');
             
-            document.getElementById('whatsapp-status').innerHTML = '🔄 Opening WhatsApp Business login...';
-            
-            const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?` +
-                `client_id=${OAUTH_CONFIG.whatsapp.clientId}&` +
-                `redirect_uri=${encodeURIComponent(OAUTH_CONFIG.whatsapp.redirectUri)}&` +
-                `scope=${OAUTH_CONFIG.whatsapp.scope}&` +
-                `response_type=code&` +
-                `state=whatsapp_auth`;
-            
-            const popup = window.open(authUrl, 'whatsapp-login', 'width=600,height=600,scrollbars=yes,resizable=yes');
-            
-            // Listen for the callback
-            const checkClosed = setInterval(() => {
-                if (popup.closed) {
-                    clearInterval(checkClosed);
-                    // Check if login was successful (would be handled by callback)
-                    setTimeout(() => {
-                        if (!serviceConnections.whatsapp.connected) {
-                            document.getElementById('whatsapp-status').innerHTML = '❌ Login cancelled or failed';
-                        }
-                    }, 1000);
-                }
-            }, 1000);
+            // Update UI
+            document.getElementById('whatsapp-status').innerHTML = '🔄 Please scan QR code in WhatsApp Web tab';
+            document.getElementById('whatsapp-status').style.color = '#ff9800';
+            document.getElementById('whatsapp-login-btn').style.display = 'none';
+            document.getElementById('whatsapp-connected-btn').style.display = 'block';
+        }
+        
+        function markWhatsAppConnected() {
+            serviceConnections.whatsapp.connected = true;
+            document.getElementById('whatsapp-status').innerHTML = '✅ Connected';
+            document.getElementById('whatsapp-status').style.color = '#2e7d32';
+            document.getElementById('whatsapp-connected-btn').style.display = 'none';
+            document.getElementById('whatsapp-logout-btn').style.display = 'block';
+            document.getElementById('whatsapp-details').style.display = 'block';
+            alert('✅ WhatsApp connected! You can now send messages.');
         }
 
         // Stripe Connect OAuth Login  
