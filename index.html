@@ -321,30 +321,11 @@ Sunday: Closed
             });
         }
 
-        // REAL OAuth Login System
+        // Simple connection tracking
         let serviceConnections = {
-            whatsapp: { connected: false, token: null, account: null },
-            stripe: { connected: false, token: null, account: null },
-            google: { connected: false, token: null, account: null }
-        };
-
-        // OAuth Configuration (clients will need to set their own app IDs)
-        const OAUTH_CONFIG = {
-            whatsapp: {
-                clientId: 'YOUR_FACEBOOK_APP_ID',
-                redirectUri: window.location.origin + '/auth/whatsapp/callback',
-                scope: 'whatsapp_business_management,whatsapp_business_messaging'
-            },
-            stripe: {
-                clientId: 'YOUR_STRIPE_CLIENT_ID', 
-                redirectUri: window.location.origin + '/auth/stripe/callback',
-                scope: 'read_write'
-            },
-            google: {
-                clientId: 'YOUR_GOOGLE_CLIENT_ID',
-                redirectUri: window.location.origin + '/auth/google/callback',
-                scope: 'https://www.googleapis.com/auth/spreadsheets'
-            }
+            whatsapp: { connected: false },
+            stripe: { connected: false },
+            google: { connected: false }
         };
 
         // Simple WhatsApp Web Login (like you want)
@@ -369,111 +350,34 @@ Sunday: Closed
             alert('✅ WhatsApp connected! You can now send messages.');
         }
 
-        // Stripe Connect OAuth Login  
+        // Simple Stripe setup
         function loginWithStripe() {
-            if (OAUTH_CONFIG.stripe.clientId === 'YOUR_STRIPE_CLIENT_ID') {
-                alert('⚠️ Setup Required: Please configure your Stripe Client ID in the OAuth settings');
-                return;
-            }
-            
-            document.getElementById('stripe-status').innerHTML = '🔄 Opening Stripe Connect login...';
-            
-            const authUrl = `https://connect.stripe.com/oauth/authorize?` +
-                `response_type=code&` +
-                `client_id=${OAUTH_CONFIG.stripe.clientId}&` +
-                `scope=${OAUTH_CONFIG.stripe.scope}&` +
-                `redirect_uri=${encodeURIComponent(OAUTH_CONFIG.stripe.redirectUri)}&` +
-                `state=stripe_auth`;
-            
-            const popup = window.open(authUrl, 'stripe-login', 'width=600,height=600,scrollbars=yes,resizable=yes');
-            
-            const checkClosed = setInterval(() => {
-                if (popup.closed) {
-                    clearInterval(checkClosed);
-                    setTimeout(() => {
-                        if (!serviceConnections.stripe.connected) {
-                            document.getElementById('stripe-status').innerHTML = '❌ Login cancelled or failed';
-                        }
-                    }, 1000);
-                }
-            }, 1000);
+            alert('💳 For Stripe: Just add your Stripe keys to the dashboard settings');
         }
 
-        // Google OAuth Login
+        // Simple Google setup  
         function loginWithGoogle() {
-            if (OAUTH_CONFIG.google.clientId === 'YOUR_GOOGLE_CLIENT_ID') {
-                alert('⚠️ Setup Required: Please configure your Google Client ID in the OAuth settings');
-                return;
-            }
-            
-            document.getElementById('google-status').innerHTML = '🔄 Opening Google login...';
-            
-            const authUrl = `https://accounts.google.com/oauth/authorize?` +
-                `response_type=code&` +
-                `client_id=${OAUTH_CONFIG.google.clientId}&` +
-                `redirect_uri=${encodeURIComponent(OAUTH_CONFIG.google.redirectUri)}&` +
-                `scope=${encodeURIComponent(OAUTH_CONFIG.google.scope)}&` +
-                `access_type=offline&` +
-                `state=google_auth`;
-            
-            const popup = window.open(authUrl, 'google-login', 'width=600,height=600,scrollbars=yes,resizable=yes');
-            
-            const checkClosed = setInterval(() => {
-                if (popup.closed) {
-                    clearInterval(checkClosed);
-                    setTimeout(() => {
-                        if (!serviceConnections.google.connected) {
-                            document.getElementById('google-status').innerHTML = '❌ Login cancelled or failed';
-                        }
-                    }, 1000);
-                }
-            }, 1000);
-        }
-
-        // Handle successful OAuth callbacks (would be called by redirect pages)
-        function handleOAuthSuccess(service, token, accountInfo) {
-            serviceConnections[service] = {
-                connected: true,
-                token: token,
-                account: accountInfo
-            };
-            
-            updateServiceUI(service);
-        }
-
-        function updateServiceUI(service) {
-            const connection = serviceConnections[service];
-            
-            if (connection.connected) {
-                document.getElementById(`${service}-status`).innerHTML = '✅ Connected';
-                document.getElementById(`${service}-status`).style.color = '#2e7d32';
-                document.getElementById(`${service}-login-btn`).style.display = 'none';
-                document.getElementById(`${service}-logout-btn`).style.display = 'block';
-                document.getElementById(`${service}-details`).style.display = 'block';
-                document.getElementById(`${service}-account`).textContent = connection.account || 'Connected Account';
-            } else {
-                document.getElementById(`${service}-status`).innerHTML = '❌ Not Connected';
-                document.getElementById(`${service}-status`).style.color = '#d32f2f';
-                document.getElementById(`${service}-login-btn`).style.display = 'block';
-                document.getElementById(`${service}-logout-btn`).style.display = 'none';
-                document.getElementById(`${service}-details`).style.display = 'none';
-            }
+            alert('📊 For Google Sheets: Just share your sheet with the dashboard email');
         }
 
         // Logout functions
         function logoutWhatsApp() {
-            serviceConnections.whatsapp = { connected: false, token: null, account: null };
-            updateServiceUI('whatsapp');
+            serviceConnections.whatsapp.connected = false;
+            document.getElementById('whatsapp-status').innerHTML = '❌ Not Connected';
+            document.getElementById('whatsapp-status').style.color = '#d32f2f';
+            document.getElementById('whatsapp-login-btn').style.display = 'block';
+            document.getElementById('whatsapp-logout-btn').style.display = 'none';
+            document.getElementById('whatsapp-details').style.display = 'none';
         }
 
         function logoutStripe() {
-            serviceConnections.stripe = { connected: false, token: null, account: null };
-            updateServiceUI('stripe');
+            serviceConnections.stripe.connected = false;
+            alert('Stripe disconnected');
         }
 
         function logoutGoogle() {
-            serviceConnections.google = { connected: false, token: null, account: null };
-            updateServiceUI('google');
+            serviceConnections.google.connected = false;
+            alert('Google disconnected');
         }
 
         function sendWhatsAppMessage(phone, messageType) {
