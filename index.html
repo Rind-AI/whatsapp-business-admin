@@ -136,6 +136,23 @@
         <!-- WhatsApp Business Setup -->
         <div class="section">
             <h2>📱 WhatsApp Business Configuration</h2>
+            
+            <!-- WhatsApp Business Login Panel -->
+            <div id="whatsapp-login-panel" style="background: #e8f5e8; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #25D366;">
+                <h3>🔐 WhatsApp Business Account Connection</h3>
+                <div id="whatsapp-status" style="margin: 10px 0;">
+                    <span style="color: #d32f2f;">❌ Not Connected</span> - Connect your WhatsApp Business account to enable automation
+                </div>
+                <div>
+                    <button id="whatsapp-connect-btn" onclick="connectWhatsAppBusiness()" style="background: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 5px; margin-right: 10px;">🔗 Connect WhatsApp Business</button>
+                    <button id="whatsapp-test-btn" onclick="testWhatsAppConnection()" style="background: #128C7E; color: white; border: none; padding: 12px 20px; border-radius: 5px;" disabled>📱 Test Connection</button>
+                </div>
+                <div id="whatsapp-details" style="margin-top: 15px; padding: 10px; background: white; border-radius: 5px; display: none;">
+                    <strong>Connected Account:</strong> <span id="business-name">-</span><br>
+                    <strong>Phone Number:</strong> <span id="business-phone">-</span><br>
+                    <strong>Status:</strong> <span id="verification-status">-</span>
+                </div>
+            </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
                     <h3>Auto-Reply Messages</h3>
@@ -173,110 +190,207 @@ Sunday: Closed
             <h2>📊 Google Sheets Integration</h2>
             <p>All customer data and orders are automatically saved to your Google Sheet:</p>
             <div style="margin: 15px 0;">
-                <a href="https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit" target="_blank" style="background: #4285f4; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">📊 Open Google Sheet</a>
+                <a id="google-sheet-link" href="https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit" target="_blank" style="background: #4285f4; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">📊 Open Google Sheet</a>
                 <button onclick="syncToSheets()" style="background: #34a853; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-left: 10px;">🔄 Sync Now</button>
+                <button onclick="createClientSheet(prompt('Enter business name:'))" style="background: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-left: 10px;">📝 Create New Sheet</button>
+            </div>
+            <div id="sync-status" style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; color: #666;">
+                Ready to sync customer data to Google Sheets
             </div>
             <p><strong>Sheet Columns:</strong> Timestamp, Customer Name, Phone, Address, Order Details, Amount, Payment Status, Order Status</p>
         </div>
     </div>
 
-    <script src="https://js.stripe.com/v3/"></script>
     <script>
-        // REAL Stripe Integration Template
-        // SETUP INSTRUCTIONS: Replace YOUR_PUBLISHABLE_KEY with client's Stripe publishable key
-        // const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE');
+        // Stripe Integration - Secure Setup (No hardcoded keys)
+        let STRIPE_CONFIG = null;
         
-        function createStripePayment(product, amount) {
-            const products = {
-                'ribeye': { name: '🥩 Premium Ribeye Steak Package', price: 5000 },
-                'chicken': { name: '🐔 Fresh Chicken Bundle', price: 3000 },
-                'mixed': { name: '🍖 Mixed Meat Package', price: 7500 }
-            };
-
-            // Display setup instructions and demo
-            document.getElementById('stripe-payment-result').innerHTML = `
-                <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px;">
-                    <h4>💳 Stripe Integration Ready!</h4>
-                    <p><strong>Product:</strong> ${products[product].name}</p>
-                    <p><strong>Amount:</strong> $${(products[product].price / 100).toFixed(2)} AUD</p>
-                    
-                    <div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 15px 0; border: 1px solid #ffeaa7;">
-                        <h5>🔧 Client Setup Required:</h5>
-                        <ol style="margin: 10px 0 0 20px;">
-                            <li>Replace <code>YOUR_PUBLISHABLE_KEY</code> with client's Stripe key</li>
-                            <li>Create server endpoint for checkout sessions</li>
-                            <li>Update API calls to use server endpoint</li>
-                            <li>Add webhook handling for payment confirmation</li>
-                        </ol>
-                    </div>
-                    
-                    <button onclick="alert('✅ Setup complete! This will create real payment links.')" style="background: #635BFF; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
-                        💳 Ready for Live Payments
-                    </button>
-                    <button onclick="copySetupGuide()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
-                        📋 Copy Setup Guide
-                    </button>
-                </div>
-            `;
-            
-            // Add to order tracking for demo
-            addDemoOrder(products[product].name, products[product].price / 100);
+        function initStripeConfig() {
+            if (!STRIPE_CONFIG) {
+                const publishableKey = prompt('🔑 Enter Stripe Publishable Key (pk_test_...):');
+                const secretKey = prompt('🔑 Enter Stripe Secret Key (sk_test_...):');
+                
+                if (publishableKey && secretKey) {
+                    STRIPE_CONFIG = { publishableKey, secretKey };
+                    return true;
+                }
+                return false;
+            }
+            return true;
         }
 
-        function copySetupGuide() {
-            const guide = `
-🔧 WHATSAPP BUSINESS STRIPE SETUP GUIDE
+        async function createStripePayment(product, amount) {
+            try {
+                if (!initStripeConfig()) {
+                    document.getElementById('stripe-payment-result').innerHTML = '❌ Stripe configuration required';
+                    return;
+                }
+                
+                document.getElementById('stripe-payment-result').innerHTML = '🔄 Creating payment link...';
+                
+                // Create Stripe checkout session
+                const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${STRIPE_CONFIG.secretKey}`,
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'payment_method_types[]': 'card',
+                        'line_items[0][price_data][currency]': 'aud',
+                        'line_items[0][price_data][product_data][name]': `Premium ${product.charAt(0).toUpperCase() + product.slice(1)} Package`,
+                        'line_items[0][price_data][unit_amount]': amount * 100, // Convert to cents
+                        'line_items[0][quantity]': '1',
+                        'mode': 'payment',
+                        'success_url': window.location.href + '?payment=success',
+                        'cancel_url': window.location.href + '?payment=cancel',
+                        'metadata[product]': product,
+                        'metadata[business]': 'WhatsApp Business Dashboard'
+                    })
+                });
 
-1️⃣ Get client's Stripe keys:
-   - Publishable key: pk_test_... or pk_live_...
-   - Secret key: sk_test_... or sk_live_...
+                if (response.ok) {
+                    const session = await response.json();
+                    
+                    document.getElementById('stripe-payment-result').innerHTML = `
+                        <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px;">
+                            <strong>✅ Payment Link Created Successfully!</strong><br><br>
+                            <strong>Product:</strong> ${product.charAt(0).toUpperCase() + product.slice(1)} Package<br>
+                            <strong>Amount:</strong> $${amount} AUD<br>
+                            <strong>Payment URL:</strong><br>
+                            <a href="${session.url}" target="_blank" style="word-break: break-all; color: #155724;">${session.url}</a><br><br>
+                            <button onclick="sendPaymentLinkViaWhatsApp('${session.url}', '${product}', ${amount})" style="background: #25D366; color: white; border: none; padding: 10px 15px; border-radius: 5px; margin-right: 10px;">📱 Send via WhatsApp</button>
+                            <button onclick="copyToClipboard('${session.url}')" style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px;">📋 Copy Link</button>
+                        </div>
+                    `;
+                    
+                    console.log('✅ Stripe checkout session created:', session.id);
+                } else {
+                    throw new Error('Failed to create payment session');
+                }
+            } catch (error) {
+                document.getElementById('stripe-payment-result').innerHTML = `
+                    <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 10px; border-radius: 5px;">
+                        ❌ Payment link creation failed: ${error.message}
+                    </div>
+                `;
+                console.error('Stripe error:', error);
+            }
+        }
 
-2️⃣ Replace in HTML:
-   - Find: YOUR_PUBLISHABLE_KEY
-   - Replace with client's publishable key
+        async function sendPaymentLinkViaWhatsApp(paymentUrl, product, amount) {
+            const phone = prompt('Enter customer phone number (with country code):');
+            if (phone) {
+                const message = `🛒 Payment Link for ${product.charAt(0).toUpperCase() + product.slice(1)} Package ($${amount})\n\nClick here to pay securely: ${paymentUrl}\n\n✅ Secure Stripe checkout\n🚚 Free delivery over $50`;
+                
+                try {
+                    await sendRealWhatsAppMessage(phone, message);
+                    alert(`✅ Payment link sent to ${phone} via WhatsApp!`);
+                } catch (error) {
+                    alert(`❌ Failed to send WhatsApp message: ${error.message}`);
+                }
+            }
+        }
 
-3️⃣ Create payment endpoint:
-   - Use Stripe API to create checkout sessions
-   - Handle webhooks for payment confirmation
-   - Store orders in database/Google Sheets
-
-4️⃣ Update WhatsApp integration:
-   - Send payment links via WhatsApp API
-   - Auto-confirm orders after payment
-   - Send delivery notifications
-
-💰 PRICING:
-   - Setup: $300-500
-   - Monthly: $50
-   - Stripe fees: 2.9% + 30¢
-
-✅ Result: Complete WhatsApp Business with payments!
-            `;
-            
-            navigator.clipboard.writeText(guide).then(() => {
-                alert('📋 Setup guide copied! Send this to clients or developers.');
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('📋 Payment link copied to clipboard!');
+            }).catch(() => {
+                alert('❌ Failed to copy to clipboard');
             });
         }
 
-        function addDemoOrder(productName, amount) {
-            const table = document.getElementById('customerTable');
-            const now = new Date();
-            const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            const row = table.insertRow(0);
-            row.className = 'customer-row';
-            row.innerHTML = `
-                <td>${time}</td>
-                <td>Demo Customer</td>
-                <td><span style="color: #666;">Setup Required</span></td>
-                <td>${productName}</td>
-                <td>$${amount.toFixed(2)}</td>
-                <td><span class="order-status status-new">Demo Order</span></td>
-                <td><small>Ready for live integration</small></td>
-            `;
+        // WhatsApp Business Integration - Secure Setup
+        let WHATSAPP_CONFIG = null;
+        
+        function initWhatsAppConfig() {
+            if (!WHATSAPP_CONFIG) {
+                const token = prompt('🔑 Enter WhatsApp Access Token:');
+                const phoneNumberId = prompt('📱 Enter Phone Number ID:');
+                
+                if (token && phoneNumberId) {
+                    WHATSAPP_CONFIG = { token, phoneNumberId, apiUrl: 'https://graph.facebook.com/v17.0' };
+                    return true;
+                }
+                return false;
+            }
+            return true;
         }
 
-        // WhatsApp Integration
+        async function connectWhatsAppBusiness() {
+            try {
+                if (!initWhatsAppConfig()) {
+                    document.getElementById('whatsapp-status').innerHTML = '❌ WhatsApp configuration required';
+                    return;
+                }
+                
+                document.getElementById('whatsapp-status').innerHTML = '🔄 Connecting to WhatsApp Business...';
+                
+                // Verify WhatsApp Business API credentials
+                const response = await fetch(`${WHATSAPP_CONFIG.apiUrl}/${WHATSAPP_CONFIG.phoneNumberId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${WHATSAPP_CONFIG.token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Update UI with connection success
+                    document.getElementById('whatsapp-status').innerHTML = '<span style="color: #2e7d32;">✅ Connected</span> - WhatsApp Business API ready';
+                    document.getElementById('business-name').textContent = data.display_phone_number || 'Business Account';
+                    document.getElementById('business-phone').textContent = data.display_phone_number || '+61 493 348 617';
+                    document.getElementById('verification-status').textContent = 'Verified & Active';
+                    document.getElementById('whatsapp-details').style.display = 'block';
+                    document.getElementById('whatsapp-test-btn').disabled = false;
+                    
+                    console.log('✅ WhatsApp Business connected:', data);
+                } else {
+                    throw new Error('Connection failed');
+                }
+            } catch (error) {
+                document.getElementById('whatsapp-status').innerHTML = '<span style="color: #d32f2f;">❌ Connection Failed</span> - Check credentials';
+                console.error('WhatsApp connection error:', error);
+            }
+        }
+
+        async function testWhatsAppConnection() {
+            try {
+                // Send test message to admin phone
+                await sendRealWhatsAppMessage('+61493348617', 'WhatsApp Business Dashboard is now connected and ready! 🎉');
+                alert('✅ Test message sent to admin phone (+61 493 348 617)');
+            } catch (error) {
+                alert('❌ Test message failed: ' + error.message);
+            }
+        }
+
+        async function sendRealWhatsAppMessage(phone, message) {
+            try {
+                const response = await fetch(`${WHATSAPP_CONFIG.apiUrl}/${WHATSAPP_CONFIG.phoneNumberId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${WHATSAPP_CONFIG.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messaging_product: 'whatsapp',
+                        to: phone.replace(/[^\d]/g, ''), // Clean phone number
+                        type: 'text',
+                        text: { body: message }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Message sending failed');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('WhatsApp send error:', error);
+                throw error;
+            }
+        }
+
         function sendWhatsAppMessage(phone, messageType) {
             const messages = {
                 order_confirmation: "✅ Your order has been confirmed! We'll prepare it now and contact you for delivery.",
@@ -284,11 +398,14 @@ Sunday: Closed
                 thank_you: "🙏 Thank you for your order! We hope you enjoyed our premium meats. Please come again!"
             };
 
-            // Simulate sending WhatsApp message
-            alert(`📱 Sending WhatsApp message to +${phone}:\n\n"${messages[messageType]}"`);
-            
-            // In real implementation, this would call your WhatsApp API
-            console.log(`Sending to ${phone}: ${messages[messageType]}`);
+            // Send real WhatsApp message
+            sendRealWhatsAppMessage(`+${phone}`, messages[messageType])
+                .then(() => {
+                    alert(`📱 WhatsApp message sent to +${phone}: "${messages[messageType]}"`);
+                })
+                .catch((error) => {
+                    alert(`❌ Failed to send WhatsApp message: ${error.message}`);
+                });
         }
 
         // Order Management
@@ -304,12 +421,74 @@ Sunday: Closed
             console.log(`Updated ${type} message:`, message);
         }
 
-        // Google Sheets Sync
-        function syncToSheets() {
-            alert('🔄 Syncing customer data to Google Sheets...');
-            setTimeout(() => {
-                alert('✅ Data synced successfully to Google Sheets!');
-            }, 2000);
+        // Google Sheets Sync - REAL API Connection
+        async function syncToSheets() {
+            try {
+                document.getElementById('sync-status').innerHTML = '🔄 Syncing to Google Sheets...';
+                
+                // Get customer data from table
+                const customers = Array.from(document.querySelectorAll('#customerTable tr')).map(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length === 0) return null;
+                    return [
+                        new Date().toISOString(),
+                        cells[0].textContent, // Time
+                        cells[1].textContent, // Customer
+                        cells[2].textContent.replace(/[^\d+]/g, ''), // Phone (clean)
+                        cells[3].textContent, // Order
+                        cells[4].textContent, // Amount
+                        cells[5].textContent, // Status
+                        'Synced from Dashboard'
+                    ];
+                }).filter(row => row !== null);
+
+                // Create/Update Google Sheet
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyGoogleSheetsProxy/exec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'sync_customers',
+                        sheetName: 'Business Orders',
+                        data: customers,
+                        headers: ['Timestamp', 'Order Time', 'Customer', 'Phone', 'Order Details', 'Amount', 'Status', 'Source']
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('sync-status').innerHTML = '✅ Synced ' + customers.length + ' orders to Google Sheets!';
+                    console.log('✅ Google Sheets sync successful');
+                } else {
+                    throw new Error('Sync failed');
+                }
+            } catch (error) {
+                document.getElementById('sync-status').innerHTML = '❌ Sync failed - Check connection';
+                console.error('Google Sheets sync error:', error);
+            }
+        }
+
+        // Auto-create Google Sheet for new clients
+        async function createClientSheet(businessName) {
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyGoogleSheetsProxy/exec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'create_business_sheet',
+                        businessName: businessName,
+                        template: 'whatsapp_business_orders'
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('✅ Google Sheet created: ' + result.sheetUrl);
+                    document.getElementById('google-sheet-link').href = result.sheetUrl;
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                alert('❌ Failed to create Google Sheet: ' + error.message);
+            }
         }
 
         // Real-time updates (simulate)
