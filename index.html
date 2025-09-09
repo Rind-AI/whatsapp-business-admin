@@ -149,6 +149,7 @@
                     <button id="whatsapp-logout-btn" onclick="logoutWhatsApp()" style="background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; width: 100%; display: none; margin-top: 5px;">🚪 Logout</button>
                     <div id="whatsapp-details" style="margin-top: 10px; font-size: 12px; color: #666; display: none;">
                         Status: Ready to send messages
+                        <button onclick="toggleWhatsAppChat()" style="background: #25D366; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-left: 10px; font-size: 11px;">💬 Open Chat</button>
                     </div>
                 </div>
 
@@ -202,6 +203,60 @@ Sunday: Closed
 💳 Payment: Cash, Card, Online
                     </textarea>
                     <button onclick="updateAutoReply('hours')" style="margin-top: 10px; padding: 10px 20px; background: #25D366; color: white; border: none; border-radius: 5px;">Update Hours Message</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp Chat Interface -->
+        <div class="section" id="whatsapp-chat-section" style="display: none;">
+            <h2>💬 WhatsApp Chat Interface</h2>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; height: 500px;">
+                
+                <!-- Contact List -->
+                <div style="border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
+                    <div style="background: #25D366; color: white; padding: 15px; font-weight: bold;">
+                        📱 Recent Chats
+                    </div>
+                    <div id="contact-list" style="max-height: 440px; overflow-y: auto;">
+                        <div class="contact-item" onclick="openChat('+61234567890', 'John Smith')" style="padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; background: #f9f9f9;">
+                            <div style="font-weight: bold;">John Smith</div>
+                            <div style="font-size: 12px; color: #666;">+61 234 567 890</div>
+                            <div style="font-size: 11px; color: #999;">Last: Order confirmation needed</div>
+                        </div>
+                        <div class="contact-item" onclick="openChat('+61234567891', 'Sarah Johnson')" style="padding: 15px; border-bottom: 1px solid #eee; cursor: pointer;">
+                            <div style="font-weight: bold;">Sarah Johnson</div>
+                            <div style="font-size: 12px; color: #666;">+61 234 567 891</div>
+                            <div style="font-size: 11px; color: #999;">Last: Delivery address update</div>
+                        </div>
+                        <div class="contact-item" onclick="openChat('+61234567892', 'Mike Wilson')" style="padding: 15px; border-bottom: 1px solid #eee; cursor: pointer;">
+                            <div style="font-weight: bold;">Mike Wilson</div>
+                            <div style="font-size: 12px; color: #666;">+61 234 567 892</div>
+                            <div style="font-size: 11px; color: #999;">Last: Thank you message</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Window -->
+                <div style="border: 1px solid #ddd; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;">
+                    <div id="chat-header" style="background: #25D366; color: white; padding: 15px; font-weight: bold;">
+                        💬 Select a contact to start chatting
+                    </div>
+                    <div id="chat-messages" style="flex: 1; padding: 15px; overflow-y: auto; background: #f5f5f5; min-height: 300px;">
+                        <div style="text-align: center; color: #666; margin-top: 50px;">
+                            Select a customer from the left to view their conversation
+                        </div>
+                    </div>
+                    <div id="chat-input-area" style="padding: 15px; border-top: 1px solid #ddd; background: white; display: none;">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="message-input" placeholder="Type your message..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none;">
+                            <button onclick="sendMessage()" style="background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;">Send</button>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <button onclick="insertQuickReply('menu')" style="background: #128C7E; color: white; border: none; padding: 5px 10px; border-radius: 15px; margin-right: 5px; font-size: 11px;">📋 Menu</button>
+                            <button onclick="insertQuickReply('hours')" style="background: #128C7E; color: white; border: none; padding: 5px 10px; border-radius: 15px; margin-right: 5px; font-size: 11px;">⏰ Hours</button>
+                            <button onclick="insertQuickReply('delivery')" style="background: #128C7E; color: white; border: none; padding: 5px 10px; border-radius: 15px; margin-right: 5px; font-size: 11px;">🚚 Delivery</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -349,6 +404,170 @@ Sunday: Closed
             document.getElementById('whatsapp-details').style.display = 'block';
             alert('✅ WhatsApp connected! You can now send messages.');
         }
+
+        // WhatsApp Chat Interface Functions
+        let currentChatPhone = null;
+        let currentChatName = null;
+
+        function toggleWhatsAppChat() {
+            const chatSection = document.getElementById('whatsapp-chat-section');
+            if (chatSection.style.display === 'none') {
+                chatSection.style.display = 'block';
+                chatSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                chatSection.style.display = 'none';
+            }
+        }
+
+        function openChat(phone, name) {
+            currentChatPhone = phone;
+            currentChatName = name;
+            
+            // Update chat header
+            document.getElementById('chat-header').innerHTML = `💬 ${name} (${phone})`;
+            
+            // Show chat input area
+            document.getElementById('chat-input-area').style.display = 'block';
+            
+            // Load demo conversation
+            loadChatHistory(phone, name);
+            
+            // Highlight selected contact
+            document.querySelectorAll('.contact-item').forEach(item => {
+                item.style.background = 'white';
+            });
+            event.target.closest('.contact-item').style.background = '#f9f9f9';
+        }
+
+        function loadChatHistory(phone, name) {
+            // Demo conversation history
+            const demoMessages = {
+                '+61234567890': [
+                    { type: 'received', text: 'Hi! Do you have ribeye steaks available?', time: '10:15 AM' },
+                    { type: 'sent', text: 'Yes! We have fresh ribeye steaks at $25/lb. How much would you like?', time: '10:16 AM' },
+                    { type: 'received', text: 'I need 2 pounds please', time: '10:18 AM' },
+                    { type: 'sent', text: 'Perfect! That will be $50. Would you like delivery or pickup?', time: '10:18 AM' }
+                ],
+                '+61234567891': [
+                    { type: 'received', text: 'My delivery address has changed', time: '9:30 AM' },
+                    { type: 'sent', text: 'No problem! What is your new address?', time: '9:31 AM' },
+                    { type: 'received', text: '123 New Street, Melbourne VIC 3000', time: '9:33 AM' }
+                ],
+                '+61234567892': [
+                    { type: 'sent', text: 'Your order has been delivered! Thank you for choosing Premium Meats.', time: '8:45 AM' },
+                    { type: 'received', text: 'Thank you! The meat quality is excellent as always 👍', time: '8:50 AM' }
+                ]
+            };
+
+            const messages = demoMessages[phone] || [];
+            const chatMessages = document.getElementById('chat-messages');
+            
+            chatMessages.innerHTML = '';
+            
+            messages.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.style.marginBottom = '15px';
+                
+                if (message.type === 'sent') {
+                    messageDiv.innerHTML = `
+                        <div style="text-align: right;">
+                            <div style="background: #25D366; color: white; padding: 10px 15px; border-radius: 15px; display: inline-block; max-width: 70%; text-align: left;">
+                                ${message.text}
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin-top: 5px;">You • ${message.time}</div>
+                        </div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div style="text-align: left;">
+                            <div style="background: white; color: #333; padding: 10px 15px; border-radius: 15px; display: inline-block; max-width: 70%; border: 1px solid #ddd;">
+                                ${message.text}
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin-top: 5px;">${name} • ${message.time}</div>
+                        </div>
+                    `;
+                }
+                
+                chatMessages.appendChild(messageDiv);
+            });
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            if (!currentChatPhone) return;
+            
+            const messageInput = document.getElementById('message-input');
+            const messageText = messageInput.value.trim();
+            
+            if (!messageText) return;
+            
+            // Add message to chat
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.style.marginBottom = '15px';
+            messageDiv.innerHTML = `
+                <div style="text-align: right;">
+                    <div style="background: #25D366; color: white; padding: 10px 15px; border-radius: 15px; display: inline-block; max-width: 70%; text-align: left;">
+                        ${messageText}
+                    </div>
+                    <div style="font-size: 11px; color: #666; margin-top: 5px;">You • ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Simulate sending via WhatsApp (would use real API)
+            console.log(`Sending to ${currentChatPhone}: ${messageText}`);
+            alert(`Message sent to ${currentChatName}!`);
+        }
+
+        function insertQuickReply(type) {
+            const quickReplies = {
+                menu: `🥩 PREMIUM MEATS MELBOURNE - MENU:
+
+🔸 BEEF: Ribeye $25/lb, Ground $8/lb
+🔸 CHICKEN: Whole $12/ea, Breast $15/lb  
+🔸 PORK: Chops $18/lb, Bacon $12/lb
+🔸 LAMB: Chops $28/lb
+
+📞 +61 493 348 617
+🚚 FREE DELIVERY over $50!`,
+
+                hours: `⏰ BUSINESS HOURS:
+Monday-Saturday: 8AM-8PM
+Sunday: Closed
+
+📞 Call during business hours
+🚚 Same-day delivery available
+💳 Payment: Cash, Card, Online`,
+
+                delivery: `🚚 DELIVERY INFO:
+• FREE delivery on orders over $50
+• Same-day delivery available
+• Delivery hours: 9AM-7PM
+• Melbourne metro area only
+• Call +61 493 348 617 to arrange`
+            };
+            
+            document.getElementById('message-input').value = quickReplies[type];
+        }
+
+        // Allow Enter key to send messages
+        document.addEventListener('DOMContentLoaded', () => {
+            const messageInput = document.getElementById('message-input');
+            if (messageInput) {
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+        });
 
         // Simple Stripe setup
         function loginWithStripe() {
