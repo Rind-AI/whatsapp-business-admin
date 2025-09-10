@@ -387,25 +387,20 @@ Sunday: Closed
                     </div>
                     
                     <div id="whatsapp-web-frame" style="height: 500px; position: relative;">
-                        <iframe 
-                            src="https://web.whatsapp.com" 
-                            style="width: 100%; height: 100%; border: none; background: #f0f0f0;"
-                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                            onload="handleWhatsAppWebLoad()"
-                            onerror="handleWhatsAppWebError()">
-                        </iframe>
-                        
-                        <div id="whatsapp-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95); display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                            <div style="text-align: center; padding: 40px;">
-                                <div style="font-size: 48px; margin-bottom: 20px;">📱</div>
-                                <h3 style="color: #075E54; margin-bottom: 15px;">WhatsApp Web Loading...</h3>
-                                <p style="color: #666; margin-bottom: 20px; max-width: 300px;">
-                                    Once loaded, scan the QR code with your WhatsApp mobile app to connect.
+                        <!-- WhatsApp Web iframe alternative -->
+                        <div id="whatsapp-connection-area" style="width: 100%; height: 100%; background: linear-gradient(135deg, #075E54, #128C7E); display: flex; align-items: center; justify-content: center; flex-direction: column; border-radius: 8px;">
+                            <div style="text-align: center; color: white; padding: 40px;">
+                                <div style="font-size: 64px; margin-bottom: 20px;">📱</div>
+                                <h3 style="margin-bottom: 15px;">WhatsApp Web Connection</h3>
+                                <p style="opacity: 0.9; margin-bottom: 30px; max-width: 400px; line-height: 1.5;">
+                                    Due to security restrictions, WhatsApp Web cannot be embedded directly. Click below to open WhatsApp Web in a popup window.
                                 </p>
-                                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #25D366;">
-                                    <strong style="color: #155724;">Pro Tip:</strong> 
-                                    <span style="color: #155724;">Keep this tab active for real-time message sync</span>
-                                </div>
+                                <button onclick="openWhatsAppWebPopup()" style="background: #25D366; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s;">
+                                    🚀 Launch WhatsApp Web
+                                </button>
+                                <p style="opacity: 0.7; margin-top: 20px; font-size: 14px;">
+                                    Once connected, use the API integration below for automated messaging
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -423,14 +418,52 @@ Sunday: Closed
                     </div>
                 </div>
                 
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
-                    <h5 style="color: #856404; margin: 0 0 10px 0;">📋 Quick Instructions:</h5>
-                    <ol style="color: #856404; margin: 0; padding-left: 20px; font-size: 14px;">
-                        <li>Wait for WhatsApp Web to load above</li>
-                        <li>Scan the QR code with your phone's WhatsApp app</li>
-                        <li>Once connected, you can manage chats directly here</li>
-                        <li>Use the dashboard features below for business automation</li>
-                    </ol>
+                <!-- REAL WhatsApp Business API Integration -->
+                <div style="margin-top: 20px; padding: 20px; background: #e8f5e8; border: 1px solid #c3e6cb; border-radius: 10px;">
+                    <h4 style="color: #155724; margin: 0 0 15px 0;">⚡ WhatsApp Business API - READY</h4>
+                    <p style="color: #155724; margin-bottom: 15px;">
+                        Your WhatsApp Business API is configured and ready. Send messages directly to customers:
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; color: #155724; font-weight: bold; margin-bottom: 5px;">Customer Phone:</label>
+                            <input type="text" id="api-phone-input" placeholder="+61493348617" style="width: 100%; padding: 10px; border: 1px solid #c3e6cb; border-radius: 5px;">
+                        </div>
+                        <div>
+                            <label style="display: block; color: #155724; font-weight: bold; margin-bottom: 5px;">Quick Messages:</label>
+                            <select id="quick-message-select" style="width: 100%; padding: 10px; border: 1px solid #c3e6cb; border-radius: 5px;">
+                                <option value="">Select quick message...</option>
+                                <option value="welcome">Welcome Message</option>
+                                <option value="menu">Menu & Prices</option>
+                                <option value="hours">Business Hours</option>
+                                <option value="order_confirmation">Order Confirmation</option>
+                                <option value="delivery_ready">Ready for Delivery</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: #155724; font-weight: bold; margin-bottom: 5px;">Message:</label>
+                        <textarea id="api-message-input" rows="4" placeholder="Type your message here..." style="width: 100%; padding: 10px; border: 1px solid #c3e6cb; border-radius: 5px;">👋 Hello! Welcome to Premium Meats Melbourne!
+
+🥩 Your trusted source for premium quality meats.
+
+💬 Type "menu" to see our products
+📞 Call: +61 493 348 617</textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button onclick="sendRealWhatsAppMessage()" style="background: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                            📱 Send Message Now
+                        </button>
+                        <button onclick="testAPIConnection()" style="background: #128C7E; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer;">
+                            🧪 Test API
+                        </button>
+                        <div id="api-status" style="color: #155724; font-weight: bold;">Ready to send</div>
+                    </div>
+                    
+                    <div id="api-result" style="margin-top: 15px;"></div>
                 </div>
                 
                 <style>
@@ -501,6 +534,195 @@ Sunday: Closed
                 iframe.src = iframe.src;
                 document.getElementById('connection-status').style.background = '#ffc107';
                 document.getElementById('connection-text').textContent = 'Refreshing WhatsApp Web...';
+            }
+        }
+
+        // REAL WhatsApp Business API Functions
+        const WHATSAPP_API = {
+            token: 'EAAKhEtZCzfAMBPVulcaQh3EDQp0TXV5pXJGNZCRMaAoQGw10BAj3tYMO4f6LZCtZCKjRGKMKWij1LzPaIbDo78CjWZCh1nBMwwHN2aIOknERTtArOvBCVHZClUCJTHT63hbhuH9SZBhDZACkbBF3xxllUlnzfYie9469z7lwi8ejCqZByCumaPPGiRehG5khsenN00vE6BSwgLSkbeIWDaegQyouqX2E2eqHboIluqP0qKOZB8DNPO',
+            phoneNumberId: '816226238231026',
+            apiUrl: 'https://graph.facebook.com/v22.0'
+        };
+
+        // Quick message templates
+        const quickMessages = {
+            welcome: `👋 Hello! Welcome to Premium Meats Melbourne!
+
+🥩 Your trusted source for premium quality meats.
+
+💬 Type "menu" to see our products
+📞 Call: +61 493 348 617
+⏰ Hours: 8AM-8PM Mon-Sat`,
+
+            menu: `🥩 PREMIUM MEATS MELBOURNE - MENU:
+
+🔸 BEEF:
+• Ribeye Steak - $25/lb
+• Ground Beef - $8/lb
+• T-Bone Steak - $22/lb
+
+🔸 CHICKEN:
+• Whole Chicken - $12/ea
+• Chicken Breast - $15/lb
+
+🔸 PORK:
+• Pork Chops - $18/lb
+• Bacon - $12/lb
+
+🔸 LAMB:
+• Lamb Chops - $28/lb
+
+To order: Call +61 493 348 617
+🚚 FREE DELIVERY over $50!`,
+
+            hours: `⏰ BUSINESS HOURS:
+Monday-Saturday: 8AM-8PM
+Sunday: Closed
+
+📞 Call during business hours
+🚚 Same-day delivery available
+💳 Payment: Cash, Card, Online`,
+
+            order_confirmation: `✅ Your order has been confirmed!
+
+We'll prepare it now and contact you for delivery within 30 minutes.
+
+💳 Payment methods: Cash, Card, Bank Transfer
+🚚 FREE delivery on orders over $50
+
+Premium Meats Melbourne 🥩`,
+
+            delivery_ready: `🚚 Your order is ready for delivery!
+
+We'll be there in 30 minutes. Please ensure someone is available to receive the order.
+
+Thank you for choosing Premium Meats Melbourne! 🥩`
+        };
+
+        // Handle quick message selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const quickSelect = document.getElementById('quick-message-select');
+            const messageInput = document.getElementById('api-message-input');
+            
+            if (quickSelect && messageInput) {
+                quickSelect.addEventListener('change', function() {
+                    if (this.value && quickMessages[this.value]) {
+                        messageInput.value = quickMessages[this.value];
+                    }
+                });
+            }
+        });
+
+        // Test API Connection
+        async function testAPIConnection() {
+            try {
+                document.getElementById('api-status').textContent = 'Testing connection...';
+                document.getElementById('api-status').style.color = '#ff9800';
+                
+                const response = await fetch(`${WHATSAPP_API.apiUrl}/${WHATSAPP_API.phoneNumberId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${WHATSAPP_API.token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('api-status').textContent = '✅ API Connected';
+                    document.getElementById('api-status').style.color = '#2e7d32';
+                    
+                    document.getElementById('api-result').innerHTML = `
+                        <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 10px; border-radius: 5px;">
+                            <strong>✅ WhatsApp Business API Connected!</strong><br>
+                            Phone: ${data.display_phone_number || '+61 493 348 617'}<br>
+                            Status: Active & Ready
+                        </div>
+                    `;
+                } else {
+                    throw new Error('API connection failed');
+                }
+            } catch (error) {
+                document.getElementById('api-status').textContent = '❌ Connection Failed';
+                document.getElementById('api-status').style.color = '#d32f2f';
+                
+                document.getElementById('api-result').innerHTML = `
+                    <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 10px; border-radius: 5px;">
+                        ❌ API connection failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Send Real WhatsApp Message
+        async function sendRealWhatsAppMessage() {
+            const phone = document.getElementById('api-phone-input').value.trim();
+            const message = document.getElementById('api-message-input').value.trim();
+            
+            if (!phone || !message) {
+                alert('Please enter both phone number and message');
+                return;
+            }
+            
+            try {
+                document.getElementById('api-status').textContent = 'Sending message...';
+                document.getElementById('api-status').style.color = '#ff9800';
+                
+                // Clean phone number (remove all non-digits except +)
+                const cleanPhone = phone.replace(/[^\d+]/g, '');
+                
+                const response = await fetch(`${WHATSAPP_API.apiUrl}/${WHATSAPP_API.phoneNumberId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${WHATSAPP_API.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messaging_product: 'whatsapp',
+                        to: cleanPhone.replace('+', ''),
+                        type: 'text',
+                        text: { body: message }
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.messages) {
+                    document.getElementById('api-status').textContent = '✅ Message Sent!';
+                    document.getElementById('api-status').style.color = '#2e7d32';
+                    
+                    document.getElementById('api-result').innerHTML = `
+                        <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px;">
+                            <strong>✅ Message Sent Successfully!</strong><br><br>
+                            <strong>To:</strong> ${phone}<br>
+                            <strong>Message ID:</strong> ${result.messages[0].id}<br>
+                            <strong>Status:</strong> Delivered to WhatsApp<br><br>
+                            <em>Customer will receive this message on their WhatsApp app</em>
+                        </div>
+                    `;
+                    
+                    // Clear inputs for next message
+                    document.getElementById('api-phone-input').value = '';
+                    document.getElementById('api-message-input').value = quickMessages.welcome;
+                    document.getElementById('quick-message-select').value = '';
+                    
+                } else {
+                    throw new Error(result.error?.message || 'Message sending failed');
+                }
+                
+            } catch (error) {
+                document.getElementById('api-status').textContent = '❌ Send Failed';
+                document.getElementById('api-status').style.color = '#d32f2f';
+                
+                document.getElementById('api-result').innerHTML = `
+                    <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 10px; border-radius: 5px;">
+                        ❌ Failed to send message: ${error.message}<br><br>
+                        Please check:
+                        <ul style="margin: 10px 0 0 20px;">
+                            <li>Phone number format (include country code)</li>
+                            <li>Recipient has WhatsApp</li>
+                            <li>Your API token is valid</li>
+                        </ul>
+                    </div>
+                `;
             }
         }
         
