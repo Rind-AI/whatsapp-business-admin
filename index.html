@@ -94,39 +94,10 @@
                 </thead>
                 <tbody id="customerTable">
                     <tr class="customer-row">
-                        <td>10:30 AM</td>
-                        <td>John Smith</td>
-                        <td><a href="https://wa.me/61234567890" class="whatsapp-link">+61 234 567 890</a></td>
-                        <td>2lb Ribeye Steak</td>
-                        <td>$50.00</td>
-                        <td><span class="order-status status-new">New</span></td>
-                        <td>
-                            <button onclick="sendWhatsAppMessage('61234567890', 'order_confirmation')">📱 Message</button>
-                            <button onclick="markCompleted('order1')">✅ Complete</button>
-                        </td>
-                    </tr>
-                    <tr class="customer-row">
-                        <td>9:45 AM</td>
-                        <td>Sarah Johnson</td>
-                        <td><a href="https://wa.me/61234567891" class="whatsapp-link">+61 234 567 891</a></td>
-                        <td>1 Whole Chicken, 1lb Ground Beef</td>
-                        <td>$20.00</td>
-                        <td><span class="order-status status-processing">Processing</span></td>
-                        <td>
-                            <button onclick="sendWhatsAppMessage('61234567891', 'ready_for_delivery')">📱 Message</button>
-                            <button onclick="markCompleted('order2')">✅ Complete</button>
-                        </td>
-                    </tr>
-                    <tr class="customer-row">
-                        <td>9:15 AM</td>
-                        <td>Mike Wilson</td>
-                        <td><a href="https://wa.me/61234567892" class="whatsapp-link">+61 234 567 892</a></td>
-                        <td>3lb Mixed Package</td>
-                        <td>$75.00</td>
-                        <td><span class="order-status status-completed">Completed</span></td>
-                        <td>
-                            <button onclick="sendWhatsAppMessage('61234567892', 'thank_you')">📱 Message</button>
-                            <button disabled>✅ Complete</button>
+                        <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
+                            <h4>Add Real Customer Orders</h4>
+                            <p>Use the form below to add real customer orders with actual phone numbers</p>
+                            <button onclick="showAddCustomerForm()" style="background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 5px;">➕ Add Real Customer</button>
                         </td>
                     </tr>
                 </tbody>
@@ -218,20 +189,12 @@ Sunday: Closed
                         📱 Recent Chats
                     </div>
                     <div id="contact-list" style="max-height: 440px; overflow-y: auto;">
-                        <div class="contact-item" onclick="openChat('+61234567890', 'John Smith')" style="padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; background: #f9f9f9;">
-                            <div style="font-weight: bold;">John Smith</div>
-                            <div style="font-size: 12px; color: #666;">+61 234 567 890</div>
-                            <div style="font-size: 11px; color: #999;">Last: Order confirmation needed</div>
-                        </div>
-                        <div class="contact-item" onclick="openChat('+61234567891', 'Sarah Johnson')" style="padding: 15px; border-bottom: 1px solid #eee; cursor: pointer;">
-                            <div style="font-weight: bold;">Sarah Johnson</div>
-                            <div style="font-size: 12px; color: #666;">+61 234 567 891</div>
-                            <div style="font-size: 11px; color: #999;">Last: Delivery address update</div>
-                        </div>
-                        <div class="contact-item" onclick="openChat('+61234567892', 'Mike Wilson')" style="padding: 15px; border-bottom: 1px solid #eee; cursor: pointer;">
-                            <div style="font-weight: bold;">Mike Wilson</div>
-                            <div style="font-size: 12px; color: #666;">+61 234 567 892</div>
-                            <div style="font-size: 11px; color: #999;">Last: Thank you message</div>
+                        <div style="padding: 20px; text-align: center; color: #666;">
+                            <h4>Enter Real Phone Number</h4>
+                            <input type="text" id="phone-input" placeholder="+61493348617" style="width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin: 10px;">
+                            <br>
+                            <button onclick="startRealChat()" style="background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Start Real Chat</button>
+                            <p style="font-size: 12px; color: #999; margin-top: 10px;">Only real phone numbers that have WhatsApp</p>
                         </div>
                     </div>
                 </div>
@@ -446,24 +409,36 @@ Sunday: Closed
             }
         }
 
-        function openChat(phone, name) {
-            currentChatPhone = phone;
-            currentChatName = name;
+        function startRealChat() {
+            const phoneInput = document.getElementById('phone-input');
+            const phone = phoneInput.value.trim();
+            
+            if (!phone) {
+                alert('Please enter a phone number');
+                return;
+            }
+            
+            // Clean and validate phone number
+            const cleanPhone = phone.replace(/[^\d+]/g, '');
+            if (!cleanPhone.startsWith('+') || cleanPhone.length < 10) {
+                alert('Please enter a valid phone number with country code (e.g., +61493348617)');
+                return;
+            }
+            
+            currentChatPhone = cleanPhone;
+            currentChatName = `Contact ${cleanPhone}`;
             
             // Update chat header
-            document.getElementById('chat-header').innerHTML = `💬 ${name} (${phone})`;
+            document.getElementById('chat-header').innerHTML = `💬 ${currentChatName}`;
             
             // Show chat input area
             document.getElementById('chat-input-area').style.display = 'block';
             
-            // Load demo conversation
-            loadChatHistory(phone, name);
+            // Load real chat
+            loadChatHistory(cleanPhone, currentChatName);
             
-            // Highlight selected contact
-            document.querySelectorAll('.contact-item').forEach(item => {
-                item.style.background = 'white';
-            });
-            event.target.closest('.contact-item').style.background = '#f9f9f9';
+            // Clear input
+            phoneInput.value = '';
         }
 
         function loadChatHistory(phone, name) {
