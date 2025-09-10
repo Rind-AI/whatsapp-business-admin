@@ -376,6 +376,13 @@ Sunday: Closed
             });
         }
 
+        // Real WhatsApp API Configuration
+        const WHATSAPP_API = {
+            token: 'EAAKhEtZCzfAMBPeuPeZCJinysNXobln3BMLi9JgPiG7rZAQFCwtdlcwnD6E9hs82sc3rmGGW14q0cAB73GtAvWWdLVPTakGCjZBxMlRw8qfHbKd9yxMRshpRoRvG929n99Pv6BwZAlDi2L7BZCgYrCUnSNhvmsvI33HlzIuv4ELu1VSrlr0ZBZAyfuOtMzEGZCgs4N10Sn9OC4oxmB5gAk5rhUbtSaKqJxkZCpZBAnlWYyxU9LKbQZDZD',
+            phoneNumberId: '816226238231026',
+            apiUrl: 'https://graph.facebook.com/v22.0'
+        };
+
         // Simple connection tracking
         let serviceConnections = {
             whatsapp: { connected: false },
@@ -395,14 +402,34 @@ Sunday: Closed
             document.getElementById('whatsapp-connected-btn').style.display = 'block';
         }
         
-        function markWhatsAppConnected() {
-            serviceConnections.whatsapp.connected = true;
-            document.getElementById('whatsapp-status').innerHTML = '✅ Connected';
-            document.getElementById('whatsapp-status').style.color = '#2e7d32';
-            document.getElementById('whatsapp-connected-btn').style.display = 'none';
-            document.getElementById('whatsapp-logout-btn').style.display = 'block';
-            document.getElementById('whatsapp-details').style.display = 'block';
-            alert('✅ WhatsApp connected! You can now send messages.');
+        async function markWhatsAppConnected() {
+            // Test the real API connection first
+            try {
+                document.getElementById('whatsapp-status').innerHTML = '🔄 Testing API connection...';
+                
+                const testResponse = await fetch(`${WHATSAPP_API.apiUrl}/${WHATSAPP_API.phoneNumberId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${WHATSAPP_API.token}`
+                    }
+                });
+                
+                if (testResponse.ok) {
+                    serviceConnections.whatsapp.connected = true;
+                    document.getElementById('whatsapp-status').innerHTML = '✅ Connected (Real API)';
+                    document.getElementById('whatsapp-status').style.color = '#2e7d32';
+                    document.getElementById('whatsapp-connected-btn').style.display = 'none';
+                    document.getElementById('whatsapp-logout-btn').style.display = 'block';
+                    document.getElementById('whatsapp-details').style.display = 'block';
+                    alert('✅ WhatsApp API connected! Real messaging ready.');
+                } else {
+                    throw new Error('API connection failed');
+                }
+            } catch (error) {
+                document.getElementById('whatsapp-status').innerHTML = '❌ API Connection Failed';
+                document.getElementById('whatsapp-status').style.color = '#d32f2f';
+                alert('❌ Failed to connect to WhatsApp API. Check token/connection.');
+                console.error('WhatsApp API error:', error);
+            }
         }
 
         // WhatsApp Chat Interface Functions
@@ -443,96 +470,59 @@ Sunday: Closed
             const chatMessages = document.getElementById('chat-messages');
             chatMessages.innerHTML = `
                 <div style="text-align: center; color: #666; margin-top: 50px;">
-                    <div style="background: #fff3cd; padding: 20px; border-radius: 10px; border: 1px solid #ffeaa7; margin: 20px;">
-                        <h4 style="color: #856404; margin-bottom: 15px;">🔗 Connect to Real WhatsApp</h4>
-                        <p style="color: #856404; margin-bottom: 15px;">To see real chat history, we need to connect to your WhatsApp Web tab.</p>
-                        <button onclick="connectToWhatsAppWeb()" style="background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 5px;">
-                            🔗 Sync with WhatsApp Web
-                        </button>
-                        <p style="color: #856404; font-size: 12px; margin-top: 10px;">
-                            This will access your WhatsApp Web session to show real conversations
+                    <div style="background: #d4edda; padding: 20px; border-radius: 10px; border: 1px solid #c3e6cb; margin: 20px;">
+                        <h4 style="color: #155724; margin-bottom: 15px;">📱 Real WhatsApp API Ready</h4>
+                        <p style="color: #155724; margin-bottom: 15px;">
+                            Connected to: <strong>${name}</strong> (${phone})
                         </p>
+                        <p style="color: #155724; font-size: 14px;">
+                            Messages you send will be delivered via WhatsApp Business API to the customer's phone.
+                        </p>
+                        <div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 15px; border: 1px solid #ffeaa7;">
+                            <small style="color: #856404;">
+                                💡 <strong>Note:</strong> Chat history from WhatsApp Business Manager would appear here in a full implementation.
+                            </small>
+                        </div>
                     </div>
                 </div>
             `;
         }
 
-        // Real WhatsApp Web Connection
-        let whatsappWebWindow = null;
-        
-        function connectToWhatsAppWeb() {
-            alert(`🔗 Connecting to WhatsApp Web...
-
-To enable real chat sync:
-1. Make sure WhatsApp Web is open and logged in
-2. This will attempt to connect to your WhatsApp Web session
-3. Real messages will appear here
-
-Note: Due to browser security, real WhatsApp sync requires a browser extension or API connection.`);
-            
-            // Attempt to connect to WhatsApp Web tab
+        // Test WhatsApp API connection function
+        async function testWhatsAppAPI() {
             try {
-                // Check if WhatsApp Web is already open
-                const whatsappTabs = window.open('', 'whatsapp-login');
-                if (whatsappTabs) {
-                    // Try to access WhatsApp Web content
-                    loadRealWhatsAppChats();
+                const response = await fetch(`${WHATSAPP_API.apiUrl}/${WHATSAPP_API.phoneNumberId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${WHATSAPP_API.token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`✅ WhatsApp API Connected Successfully!\n\nPhone: ${data.display_phone_number}\nStatus: ${data.verified_name}`);
+                    return true;
+                } else {
+                    throw new Error('API connection failed');
                 }
             } catch (error) {
-                showWhatsAppConnectionError();
+                alert(`❌ WhatsApp API Connection Failed\n\nError: ${error.message}\n\nCheck your token and phone number ID.`);
+                return false;
             }
         }
         
-        function loadRealWhatsAppChats() {
-            const chatMessages = document.getElementById('chat-messages');
-            chatMessages.innerHTML = `
-                <div style="text-align: center; color: #666; margin-top: 50px;">
-                    <div style="background: #d4edda; padding: 20px; border-radius: 10px; border: 1px solid #c3e6cb; margin: 20px;">
-                        <h4 style="color: #155724; margin-bottom: 15px;">⚠️ Browser Security Limitation</h4>
-                        <p style="color: #155724; margin-bottom: 15px;">
-                            To show REAL WhatsApp messages, you need one of these options:
-                        </p>
-                        <div style="text-align: left; color: #155724;">
-                            <p><strong>Option 1:</strong> Use WhatsApp Business API (requires setup)</p>
-                            <p><strong>Option 2:</strong> Install browser extension for WhatsApp Web access</p>
-                            <p><strong>Option 3:</strong> Copy-paste messages manually from WhatsApp Web</p>
-                        </div>
-                        <button onclick="openWhatsAppWebSideBySide()" style="background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-top: 15px;">
-                            📱 Open WhatsApp Web Side-by-Side
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function openWhatsAppWebSideBySide() {
-            // Open WhatsApp Web in a resized window for side-by-side use
-            const whatsappWindow = window.open(
-                'https://web.whatsapp.com', 
-                'whatsapp-web',
-                'width=800,height=600,scrollbars=yes,resizable=yes,left=0,top=0'
-            );
-            
-            alert(`💡 WhatsApp Web opened side-by-side!
-
-You can now:
-1. Use WhatsApp Web in the popup window
-2. Copy conversations and paste them here
-3. Use this admin panel for order management
-4. Both windows work together
-
-For REAL integration, you'll need WhatsApp Business API setup.`);
-        }
-        
-        function sendMessage() {
+        async function sendMessage() {
             if (!currentChatPhone) return;
+            if (!serviceConnections.whatsapp.connected) {
+                alert('❌ Please connect WhatsApp API first');
+                return;
+            }
             
             const messageInput = document.getElementById('message-input');
             const messageText = messageInput.value.trim();
             
             if (!messageText) return;
             
-            // Add message to chat display
+            // Add message to chat display immediately
             const chatMessages = document.getElementById('chat-messages');
             const messageDiv = document.createElement('div');
             messageDiv.style.marginBottom = '15px';
@@ -541,7 +531,7 @@ For REAL integration, you'll need WhatsApp Business API setup.`);
                     <div style="background: #25D366; color: white; padding: 10px 15px; border-radius: 15px; display: inline-block; max-width: 70%; text-align: left;">
                         ${messageText}
                     </div>
-                    <div style="font-size: 11px; color: #666; margin-top: 5px;">You • ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    <div style="font-size: 11px; color: #666; margin-top: 5px;">You • ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} • Sending...</div>
                 </div>
             `;
             
@@ -551,21 +541,64 @@ For REAL integration, you'll need WhatsApp Business API setup.`);
             // Clear input
             messageInput.value = '';
             
-            // Show instruction to manually send in WhatsApp Web
-            const instructions = document.createElement('div');
-            instructions.style.cssText = 'background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #ffeaa7;';
-            instructions.innerHTML = `
-                <small style="color: #856404;">
-                    📱 <strong>Send this in WhatsApp Web:</strong> Copy the message above and send it to ${currentChatName} (${currentChatPhone}) in your WhatsApp Web window.
-                </small>
-            `;
-            chatMessages.appendChild(instructions);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // Copy to clipboard for easy pasting
-            navigator.clipboard.writeText(messageText).then(() => {
-                console.log(`Message copied to clipboard: ${messageText}`);
-            });
+            try {
+                // Send REAL WhatsApp message via API
+                const response = await fetch(`${WHATSAPP_API.apiUrl}/${WHATSAPP_API.phoneNumberId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${WHATSAPP_API.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messaging_product: 'whatsapp',
+                        to: currentChatPhone.replace(/[^\d]/g, ''), // Clean phone number
+                        type: 'text',
+                        text: { body: messageText }
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Update message status to delivered
+                    const statusEl = messageDiv.querySelector('div:last-child');
+                    statusEl.innerHTML = `You • ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} • ✅ Delivered`;
+                    
+                    // Show success notification
+                    const successDiv = document.createElement('div');
+                    successDiv.style.cssText = 'background: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #c3e6cb;';
+                    successDiv.innerHTML = `
+                        <small style="color: #155724;">
+                            ✅ <strong>Message delivered to ${currentChatName}</strong> via WhatsApp Business API
+                        </small>
+                    `;
+                    chatMessages.appendChild(successDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    console.log('✅ WhatsApp message sent successfully:', result);
+                } else {
+                    throw new Error('Failed to send message');
+                }
+                
+            } catch (error) {
+                // Update message status to failed
+                const statusEl = messageDiv.querySelector('div:last-child');
+                statusEl.innerHTML = `You • ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} • ❌ Failed`;
+                statusEl.style.color = '#dc3545';
+                
+                // Show error notification
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'background: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; border: 1px solid #f5c6cb;';
+                errorDiv.innerHTML = `
+                    <small style="color: #721c24;">
+                        ❌ <strong>Failed to send message:</strong> ${error.message}
+                    </small>
+                `;
+                chatMessages.appendChild(errorDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                console.error('❌ WhatsApp message failed:', error);
+            }
         }
 
         function insertQuickReply(type) {
@@ -641,9 +674,9 @@ Sunday: Closed
             alert('Google disconnected');
         }
 
-        function sendWhatsAppMessage(phone, messageType) {
+        async function sendWhatsAppMessage(phone, messageType) {
             if (!serviceConnections.whatsapp.connected) {
-                alert('❌ Please connect WhatsApp Business first');
+                alert('❌ Please connect WhatsApp API first');
                 return;
             }
             
@@ -653,12 +686,33 @@ Sunday: Closed
                 thank_you: "🙏 Thank you for your order! We hope you enjoyed our premium meats. Please come again!"
             };
 
-            // Send real WhatsApp message using OAuth token
-            alert(`📱 Sending WhatsApp message to +${phone}:\n\n"${messages[messageType]}"`);
-            
-            // Real API call would use serviceConnections.whatsapp.token
-            console.log(`Using token: ${serviceConnections.whatsapp.token}`);
-            console.log(`Sending to ${phone}: ${messages[messageType]}`);
+            try {
+                // Send REAL WhatsApp message via API
+                const response = await fetch(`${WHATSAPP_API.apiUrl}/${WHATSAPP_API.phoneNumberId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${WHATSAPP_API.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messaging_product: 'whatsapp',
+                        to: phone.replace(/[^\d]/g, ''),
+                        type: 'text',
+                        text: { body: messages[messageType] }
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`✅ WhatsApp message sent to +${phone}:\n\n"${messages[messageType]}"`);
+                    console.log('✅ Message sent successfully:', result);
+                } else {
+                    throw new Error('API call failed');
+                }
+            } catch (error) {
+                alert(`❌ Failed to send WhatsApp message: ${error.message}`);
+                console.error('❌ WhatsApp send error:', error);
+            }
         }
 
         // Order Management
