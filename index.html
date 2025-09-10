@@ -355,14 +355,153 @@ Sunday: Closed
 
         // Simple WhatsApp Web Login (like you want)
         function openWhatsAppWeb() {
-            // Open WhatsApp Web in new tab
-            window.open('https://web.whatsapp.com', '_blank');
-            
-            // Update UI
-            document.getElementById('whatsapp-status').innerHTML = '🔄 Please scan QR code in WhatsApp Web tab';
+            // Show WhatsApp Web directly in the admin dashboard
+            document.getElementById('whatsapp-status').innerHTML = '🔄 Loading WhatsApp Web in dashboard...';
             document.getElementById('whatsapp-status').style.color = '#ff9800';
             document.getElementById('whatsapp-login-btn').style.display = 'none';
             document.getElementById('whatsapp-connected-btn').style.display = 'block';
+            
+            // Load WhatsApp Web directly in the chat section
+            loadWhatsAppWebInDashboard();
+        }
+
+        // Load WhatsApp Web directly inside the admin dashboard
+        function loadWhatsAppWebInDashboard() {
+            // Show the chat section
+            document.getElementById('whatsapp-chat-section').style.display = 'block';
+            
+            // Replace chat interface with WhatsApp Web embed
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = `
+                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #075E54, #25D366); color: white; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 10px 0;">📱 WhatsApp Web Integration</h3>
+                    <p style="margin: 0; opacity: 0.9;">Scan QR code to connect your WhatsApp account</p>
+                </div>
+                
+                <div id="whatsapp-web-container" style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div style="background: #075E54; color: white; padding: 15px; text-align: center; position: relative;">
+                        <h4 style="margin: 0;">WhatsApp Web</h4>
+                        <button onclick="openWhatsAppWebPopup()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: #25D366; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+                            🔗 Open in New Tab
+                        </button>
+                    </div>
+                    
+                    <div id="whatsapp-web-frame" style="height: 500px; position: relative;">
+                        <iframe 
+                            src="https://web.whatsapp.com" 
+                            style="width: 100%; height: 100%; border: none; background: #f0f0f0;"
+                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                            onload="handleWhatsAppWebLoad()"
+                            onerror="handleWhatsAppWebError()">
+                        </iframe>
+                        
+                        <div id="whatsapp-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95); display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                            <div style="text-align: center; padding: 40px;">
+                                <div style="font-size: 48px; margin-bottom: 20px;">📱</div>
+                                <h3 style="color: #075E54; margin-bottom: 15px;">WhatsApp Web Loading...</h3>
+                                <p style="color: #666; margin-bottom: 20px; max-width: 300px;">
+                                    Once loaded, scan the QR code with your WhatsApp mobile app to connect.
+                                </p>
+                                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #25D366;">
+                                    <strong style="color: #155724;">Pro Tip:</strong> 
+                                    <span style="color: #155724;">Keep this tab active for real-time message sync</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-top: 1px solid #e9ecef;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div id="connection-status" style="width: 12px; height: 12px; background: #ffc107; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                                <span id="connection-text" style="color: #666; font-size: 14px;">Waiting for connection...</span>
+                            </div>
+                            <button onclick="refreshWhatsAppWeb()" style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
+                    <h5 style="color: #856404; margin: 0 0 10px 0;">📋 Quick Instructions:</h5>
+                    <ol style="color: #856404; margin: 0; padding-left: 20px; font-size: 14px;">
+                        <li>Wait for WhatsApp Web to load above</li>
+                        <li>Scan the QR code with your phone's WhatsApp app</li>
+                        <li>Once connected, you can manage chats directly here</li>
+                        <li>Use the dashboard features below for business automation</li>
+                    </ol>
+                </div>
+                
+                <style>
+                @keyframes pulse {
+                    0% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                    100% { opacity: 1; }
+                }
+                </style>
+            `;
+            
+            // Auto-hide overlay after 5 seconds
+            setTimeout(() => {
+                const overlay = document.getElementById('whatsapp-overlay');
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    overlay.style.transition = 'opacity 1s ease';
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 1000);
+                }
+            }, 5000);
+            
+            // Update status
+            document.getElementById('whatsapp-status').innerHTML = '🔗 WhatsApp Web loaded in dashboard';
+            document.getElementById('whatsapp-status').style.color = '#2e7d32';
+        }
+
+        // Handle WhatsApp Web iframe load
+        function handleWhatsAppWebLoad() {
+            document.getElementById('connection-status').style.background = '#28a745';
+            document.getElementById('connection-text').textContent = 'WhatsApp Web loaded - Ready to scan QR';
+        }
+
+        // Handle WhatsApp Web iframe error
+        function handleWhatsAppWebError() {
+            document.getElementById('connection-status').style.background = '#dc3545';
+            document.getElementById('connection-text').textContent = 'Connection failed - Click refresh to retry';
+        }
+
+        // Open WhatsApp Web in popup for better experience
+        function openWhatsAppWebPopup() {
+            const popup = window.open(
+                'https://web.whatsapp.com', 
+                'whatsapp-web', 
+                'width=1200,height=800,scrollbars=yes,resizable=yes'
+            );
+            if (popup) {
+                // Monitor popup connection
+                const checkConnection = setInterval(() => {
+                    try {
+                        if (popup.closed) {
+                            clearInterval(checkConnection);
+                            document.getElementById('connection-text').textContent = 'Popup closed - Connection may be active';
+                            document.getElementById('connection-status').style.background = '#ffc107';
+                        }
+                    } catch (e) {
+                        // Cross-origin restrictions, but that's expected
+                    }
+                }, 1000);
+            }
+        }
+
+        // Refresh WhatsApp Web iframe
+        function refreshWhatsAppWeb() {
+            const iframe = document.querySelector('#whatsapp-web-frame iframe');
+            if (iframe) {
+                iframe.src = iframe.src;
+                document.getElementById('connection-status').style.background = '#ffc107';
+                document.getElementById('connection-text').textContent = 'Refreshing WhatsApp Web...';
+            }
         }
         
         async function markWhatsAppConnected() {
